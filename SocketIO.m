@@ -23,7 +23,7 @@
 #import "ASIHTTPRequest.h"
 #import "WebSocket.h"
 #import "RegexKitLite.h"
-#import "SBJson.h"
+#import <SBJson/SBJson.h>
 
 #define DEBUG_LOGS 1
 #define HANDSHAKE_URL @"http://%@:%d/socket.io/1/?t=%d%@"
