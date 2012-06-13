@@ -546,7 +546,14 @@
         
         [self openSocket];   
     } else {
-        [self requestFailed:request];
+        _isConnected = NO;
+        _isConnecting = NO;
+        
+        if ([_delegate respondsToSelector:@selector(socketIOHandshakeFailed:withError:)])
+        {
+            NSError *error = [NSError errorWithDomain:@"SocketIO" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Handshake error" forKey:NSLocalizedDescriptionKey]];
+            [_delegate socketIOHandshakeFailed:self withError:error];
+        }
     }
 }
 
@@ -558,9 +565,9 @@
     _isConnected = NO;
     _isConnecting = NO;
     
-    if ([_delegate respondsToSelector:@selector(socketIOHandshakeFailed:)])
+    if ([_delegate respondsToSelector:@selector(socketIOHandshakeFailed:withError:)])
     {
-        [_delegate socketIOHandshakeFailed:self];
+        [_delegate socketIOHandshakeFailed:self withError:error];
     }
 }
 
