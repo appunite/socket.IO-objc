@@ -526,7 +526,6 @@
 
 - (void) requestFinished:(ASIHTTPRequest *)request
 {
-    NSLog(@"Code: %i", request.responseStatusCode);
     if (request.responseStatusCode == 200) {
         NSString *responseString = [request responseString];
         [self log:[NSString stringWithFormat:@"requestFinished() %@", responseString]];
