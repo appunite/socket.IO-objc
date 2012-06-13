@@ -111,4 +111,5 @@ typedef void(^SocketIOCallback)(id argsData);
 - (NSNumber *) typeAsNumber;
 - (NSString *) typeForIndex:(int)index;
 
+
 @end

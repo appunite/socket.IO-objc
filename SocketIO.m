@@ -52,6 +52,9 @@
 - (NSString *) addAcknowledge:(SocketIOCallback)function;
 - (void) removeAcknowledgeForKey:(NSString *)key;
 
+- (void) requestFinished:(ASIHTTPRequest *)request;
+- (void) requestFailed:(ASIHTTPRequest *)request;
+
 @end
 
 
@@ -194,6 +197,7 @@
 {
     SocketIOPacket *packet = [[SocketIOPacket alloc] initWithType:@"disconnect"];
     [self send:packet];
+    [self onDisconnect];
 }
 
 - (void) sendConnect
@@ -295,7 +299,7 @@
         {
             case 0:
                 [self log:@"disconnect"];
-                [self onDisconnect];
+                //[self onDisconnect];
                 break;
                 
             case 1:
@@ -522,24 +526,29 @@
 
 - (void) requestFinished:(ASIHTTPRequest *)request
 {
-    NSString *responseString = [request responseString];
-    [self log:[NSString stringWithFormat:@"requestFinished() %@", responseString]];
-    NSArray *data = [responseString componentsSeparatedByString:@":"];
-    
-    _sid = [data objectAtIndex:0];
-    [self log:[NSString stringWithFormat:@"sid: %@", _sid]];
-    
-    // add small buffer of 7sec (magic xD)
-    _heartbeatTimeout = [[data objectAtIndex:1] floatValue] + 7.0;
-    [self log:[NSString stringWithFormat:@"heartbeatTimeout: %f", _heartbeatTimeout]];
-    
-    // index 2 => connection timeout
-    
-    NSString *t = [data objectAtIndex:3];
-    NSArray *transports = [t componentsSeparatedByString:@","];
-    [self log:[NSString stringWithFormat:@"transports: %@", transports]];
-    
-    [self openSocket];
+    NSLog(@"Code: %i", request.responseStatusCode);
+    if (request.responseStatusCode == 200) {
+        NSString *responseString = [request responseString];
+        [self log:[NSString stringWithFormat:@"requestFinished() %@", responseString]];
+        NSArray *data = [responseString componentsSeparatedByString:@":"];
+        
+        _sid = [data objectAtIndex:0];
+        [self log:[NSString stringWithFormat:@"sid: %@", _sid]];
+        
+        // add small buffer of 7sec (magic xD)
+        _heartbeatTimeout = [[data objectAtIndex:1] floatValue] + 7.0;
+        [self log:[NSString stringWithFormat:@"heartbeatTimeout: %f", _heartbeatTimeout]];
+        
+        // index 2 => connection timeout
+        
+        NSString *t = [data objectAtIndex:3];
+        NSArray *transports = [t componentsSeparatedByString:@","];
+        [self log:[NSString stringWithFormat:@"transports: %@", transports]];
+        
+        [self openSocket];   
+    } else {
+        [self requestFailed:request];
+    }
 }
 
 - (void) requestFailed:(ASIHTTPRequest *)request
